@@ -12,4 +12,4 @@ This repository holds the scripts that reproduce the analysis in the paper [1].
 References
 =======
 [1.] Large-Scale Multiple Testing of Composite Null Hypotheses Under Heteroskedasticity   
-Banerjee, T. and Gang, B. (2023) _(under review)_
+Gang, B. and Banerjee, T.(2023) _(under review)_
