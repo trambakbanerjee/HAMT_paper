@@ -30,7 +30,7 @@ gd_2 = gd_3 = matrix(0,100,length(u))
 
 for(nn in 1:length(u)){
   
-  source('funcs.R')
+  source('../funcs.R')
   set.seed(r)
   sig = runif(n,0.25,u[nn])
   mu = 3*sig
