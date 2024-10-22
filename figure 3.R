@@ -10,7 +10,6 @@ library(splines)
 
 source('funcs.R')
 
-require(REBayes)
 n = 10000
 reps=1
 
@@ -38,65 +37,10 @@ for(r in 1:reps){
   
   f_hat = nest.func.fast(x,sig,rep(1/length(x),length(x)),n)
   ################# Proposed ####################
-  m = 50
-  K = 10
-  gd=seq(from=min(x),to=max(x),length.out=m)
-  B=matrix(0,n,K)
-  for(i in 1:n){
-    for(k in 1:K){
-      B[i,k]=0.5*cos(k*sig[i])+0.5;
-    }
-  }
-  A=matrix(0,n,m*K);
-  for(i in 1:n){
-    A[i,]=unlist(sapply(1:m,function(j) rep(dnorm(x[i]-gd[j],0,sig[i]),K)*B[i,]))
-  }
-  
-  Q=matrix(0,n,m*K)
-  for(i in 1:n){
-    Q[i,] = rep(B[i,],m)
-  }
-  A_new = A
-  H = crossprod(A_new)
-  H = H+10^{-5}*diag(m*K)
-  #Sparse matrix construction
-  Q_sparse = sparseMatrix(i=c(rep(1:n,each=m*K)),j=c(rep(1:(m*K),n)),x=c(t(Q)))
-  BB = c(t(B))
-  rr = c(unlist(sapply(1:n, function(i) rep((1+(i-1)*K):(i*K),m))))
-  L_sparse = sparseMatrix(i=rep(1:(n*m),each = K),j=rep(1:(m*K),n),x=BB[rr])
-  
-  # Specify the non-quadratic part of the problem.
-  prob <- list(sense="min")
-  prob$c <- -t(A_new)%*%f_hat
-  prob$A <- rbind(Q_sparse,L_sparse)
-  prob$bc <- rbind(blc=c(rep(1,n),rep(0,n*m)), 
-                   buc=c(rep(1,n),rep(Inf,n*m)))
-  prob$bx <- rbind(blx=rep(-Inf,m*K), 
-                   bux=rep(Inf,m*K))
-  
-  # Specify the quadratic objective matrix in triplet form.
-  prob$qobj$i <- c(unlist(sapply(1:(m*K),function(i) i:(m*K))))
-  prob$qobj$j <- rep(1:(m*K),(m*K):1)
-  prob$qobj$v <- c(H[lower.tri(H,diag = T)])
- 
-  # Solve the problem
-  out_mosek_quad <- mosek(prob)
-  if(out_mosek_quad$sol$itr$prosta=="PRIMAL_INFEASIBLE"){
-    prob$bc <- rbind(blc=c(rep(0.9,n),rep(0,n*m)), 
-                     buc=c(rep(1,n),rep(Inf,n*m)))
-    out_mosek_quad <- mosek(prob)
-    f = out_mosek_quad$sol$itr$xx
-    f<- matrix(f,ncol=m,byrow=F)
-    w_mosek = t(B%*%f)
-    for(i in 1:n){
-      w_mosek[,i] = w_mosek[,i]/sum(w_mosek[,i])
-    }
-  } else {
-    f = out_mosek_quad$sol$itr$xx
-    f<- matrix(f,ncol=m,byrow=F)
-    w_mosek = t(B%*%f)
-  }
-  
+  gd=seq(from=min(x),to=max(x),length.out=50)
+  hamt = hamt_opt(x,sig,f_hat,gd)
+  w_mosek = hamt$probs
+
   #### Marginal density plot at sig = 1
   a= seq(-5,15,length.out=1000)
   id.sig = which.min(abs(sig-1))

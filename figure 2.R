@@ -36,7 +36,7 @@ result<-foreach(r = 1:reps,.packages=c("REBayes","MASS","Rmosek","rmutil"))%dopa
   w.npmle=npmle.g$y
   gd.npmle=npmle.g$x
   clfdr.npmle = clfdr.func(x,sig,mu0,w.npmle,gd.npmle,
-                           f_hat,type='npmle')
+                           type='npmle')
   decisions.npmle = sc.func(clfdr.npmle,q)
   fdp.npmle.r = sum((1-theta)*decisions.npmle$de)/max(sum(decisions.npmle$de),1)
   etp.npmle.r=sum((theta)*decisions.npmle$de)/max(sum(theta), 1)
@@ -46,72 +46,17 @@ result<-foreach(r = 1:reps,.packages=c("REBayes","MASS","Rmosek","rmutil"))%dopa
   w.deconv=deconv.g$y/sum(deconv.g$y)
   gd.deconv=deconv.g$x
   clfdr.deconv = clfdr.func(x,sig,mu0,w.deconv,gd.deconv,
-                            f_hat,type='npmle')
+                            type='npmle')
   decisions.deconv = sc.func(clfdr.deconv,q)
   fdp.deconv.r = sum((1-theta)*decisions.deconv$de)/max(sum(decisions.deconv$de),1)
   etp.deconv.r = sum((theta)*decisions.deconv$de)/max(sum(theta), 1)
   
   ################# Proposed ####################
-  m = length_out
-  K = bases
-  gd=seq(from=min(x),to=max(x),length.out=m)
-  B=matrix(0,n,K)
-  for(i in 1:n){
-    for(k in 1:K){
-      B[i,k]=0.5*cos(k*sig[i])+0.5;
-    }
-  }
-  A=matrix(0,n,m*K);
-  for(i in 1:n){
-    A[i,]=unlist(sapply(1:m,function(j) rep(dnorm(x[i]-gd[j],0,sig[i]),K)*B[i,]))
-  }
-  
-  Q=matrix(0,n,m*K)
-  for(i in 1:n){
-    Q[i,] = rep(B[i,],m)
-  }
-  A_new = A
-  H = crossprod(A_new)
-  H = H+10^{-5}*diag(m*K)
-  #Sparse matrix construction
-  Q_sparse = sparseMatrix(i=c(rep(1:n,each=m*K)),j=c(rep(1:(m*K),n)),x=c(t(Q)))
-  BB = c(t(B))
-  rr = c(unlist(sapply(1:n, function(i) rep((1+(i-1)*K):(i*K),m))))
-  L_sparse = sparseMatrix(i=rep(1:(n*m),each = K),j=rep(1:(m*K),n),x=BB[rr])
-  
-  # Specify the non-quadratic part of the problem.
-  prob <- list(sense="min")
-  prob$c <- -t(A_new)%*%f_hat
-  prob$A <- rbind(Q_sparse,L_sparse)
-  prob$bc <- rbind(blc=c(rep(1,n),rep(0,n*m)), 
-                   buc=c(rep(1,n),rep(Inf,n*m)))
-  prob$bx <- rbind(blx=rep(-Inf,m*K), 
-                   bux=rep(Inf,m*K))
-  
-  # Specify the quadratic objective matrix in triplet form.
-  prob$qobj$i <- c(unlist(sapply(1:(m*K),function(i) i:(m*K))))
-  prob$qobj$j <- rep(1:(m*K),(m*K):1)
-  prob$qobj$v <- c(H[lower.tri(H,diag = T)])
-  
-  # Solve the problem
-  out_mosek_quad <- mosek(prob)
-  if(out_mosek_quad$sol$itr$prosta=="PRIMAL_INFEASIBLE"){
-    prob$bc <- rbind(blc=c(rep(0.9,n),rep(0,n*m)), 
-                     buc=c(rep(1,n),rep(Inf,n*m)))
-    out_mosek_quad <- mosek(prob)
-    f = out_mosek_quad$sol$itr$xx
-    f<- matrix(f,ncol=m,byrow=F)
-    w_mosek_quad = t(B%*%f)
-    for(i in 1:n){
-      w_mosek_quad[,i] = w_mosek_quad[,i]/sum(w_mosek_quad[,i])
-    }
-  } else {
-    f = out_mosek_quad$sol$itr$xx
-    f<- matrix(f,ncol=m,byrow=F)
-    w_mosek_quad = t(B%*%f)
-  }
-  clfdr.dd = clfdr.func(x,sig,mu0,w_mosek_quad,gd,
-                        f_hat,type='proposed')
+  gd=seq(from=min(x),to=max(x),length.out=length_out)
+  hamt = hamt_opt(x,sig,f_hat,gd,length_out,bases)
+
+  clfdr.dd = clfdr.func(x,sig,mu0,hamt$probs,gd,
+                        type='proposed')
   decisions.dd = sc.func(clfdr.dd,q)
   fdp.dd.r = sum((1-theta)*decisions.dd$de)/max(sum(decisions.dd$de),1)
   etp.dd.r=sum((theta)*decisions.dd$de)/max(sum(theta), 1)
