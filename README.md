@@ -6,6 +6,12 @@ the variances into the testing procedure. Our approach relies on an improved non
 
 The main idea
 ------------
+Suppose $X_i$, $i=1, \cdots, m$, are independent summary statistics arising from the following random mixture model:
+
+$$X_{i}=\mu_i+\sigma_i\epsilon_{i},~~\epsilon_{i}\stackrel{i.i.d.}{\sim}\eta(\cdot),\quad\mu_i\mid\sigma_i\stackrel{ind.}{\sim}g_\mu(\cdot\mid\sigma_i),\quad\sigma_i\stackrel{i.i.d.}{\sim}g_\sigma(\cdot),$$
+
+where $\epsilon_{i}$ are i.i.d. $0$ mean random variables with a known probability density function (PDF) $\eta(\cdot)$ and $g_\mu(\cdot\mid\sigma_i)$, $g_\sigma(\cdot)$ are, respectively, the PDFs of the unknown mixing distributions of $\mu$ given $\sigma_i$ and $\sigma_i$. Upon observing the pair $(X_i, \sigma_i)$, the goal is to simultaneously test the following $m$ hypotheses: $H_{0, i}: \mu_i \in \mathcal{A} \quad \text{versus} \quad  H_{1, i}: \mu_i \notin \mathcal{A},~i=1,\ldots,m$, 
+where $\mathcal A$ represents the indifference region such that the researcher is indifferent to the effects in $\mathcal A$.
 
 How to use this repository?
 ----------
