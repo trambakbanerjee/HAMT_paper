@@ -20,9 +20,9 @@ Here the matrices $\mathbf{\varphi}$, A, B and C are known and discussed in Sect
 How to use this repository?
 ----------
 
-This repository holds the scripts that reproduce the analysis in the paper [1]. In particular, the subfolder `simulations` has the R code to reproduce figures 4 to 32 in the paper while the R code for reproducing figures 1 to 3 are available in the main directory. In each case, the code `funcs.R` (available inside the `simulation` subfolder) must be available in the current R working directory. You will also need `MOSEK 9.3 or higher` and the associated R interface available in the [`Rmosek`](https://docs.mosek.com/latest/rmosek/index.html) package.
+This repository holds the scripts that reproduce the analysis in the paper [1]. In particular, the subfolder `simulations` has the R code to reproduce figures 4 to 32 in the paper while the R code for reproducing figures 1 to 3 are available in the main directory. In each case, the code `funcs.R` (also available inside the `simulation` subfolder) must be available in the current R working directory. You will also need `MOSEK 9.3 or higher` and the associated R interface available in the [`Rmosek`](https://docs.mosek.com/latest/rmosek/index.html) package.
 
-If the interest is in testing `HAMT` on your own examples then `example 1.R` and `example 2.R` are good places to begin. Again, please make `funcs.R` is in the current working directory. 
+If the interest is in testing `HAMT` on your own examples then `example 1.R` and `example 2.R` are good places to begin. Again, please make sure `funcs.R` is in the current working directory. 
 
 References
 =======
